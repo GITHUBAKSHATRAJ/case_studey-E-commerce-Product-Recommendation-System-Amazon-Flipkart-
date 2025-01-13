@@ -1,53 +1,148 @@
-# case_studey-E-commerce-Product-Recommendation-System-Amazon-Flipkart-
-E-commerce Product Recommendation System Real-Life Example • Amazon and Flipkart utilize recommendation systems to personalize the shopping experience by analyzing user profiles, browsing history, purchase history, and preferences. • Example: When a user views a smartphone, the system might recommend accessories like cases, screen protectors, 
+# Recommendation System: Implementation and Explanation
 
-
-# Recommendation System Query Explanation
-
-This README explains how the recommendation query works step-by-step, including the logic, SQL structure, and the expected output. The purpose of this query is to recommend products to a specific user based on the categories of products they have already purchased, while excluding items they have already bought.
+This README file explains the implementation of a recommendation system using SQL and Python, which employs both collaborative filtering and content-based recommendation techniques. The system uses a MySQL database to store user, product, and purchase data.
 
 ---
 
-## Table Structures
-![Screenshot 2025-01-13 030956](https://github.com/user-attachments/assets/16b63707-4e3e-4229-9c3c-bcd58c191a5b)
+## Database Schema
 
+### Tables
 
-### 1. **`Purchases` Table**
-This table stores information about product purchases made by users.
+1. **`user_product_aggregation`**
+   - Aggregates purchase data by user and category.
+   
+   ```sql
+   CREATE TABLE user_product_aggregation (
+       user_id INT NOT NULL,
+       category VARCHAR(255) NOT NULL,
+       purchase_count INT NOT NULL,
+       PRIMARY KEY (user_id, category)
+   );
+   ```
 
-| Field         | Type   | Description                           |
-|---------------|--------|---------------------------------------|
-| `id`          | INT    | Unique ID for each purchase.          |
-| `user_id`     | INT    | ID of the user who made the purchase. |
-| `product_id`  | INT    | ID of the purchased product.          |
-| `purchase_date` | DATE | Date when the purchase was made.      |
+2. **`Users`**
+   - Stores user information.
+   
+   ```sql
+   CREATE TABLE Users (
+       user_id INT PRIMARY KEY AUTO_INCREMENT,
+       name VARCHAR(100),
+       email VARCHAR(100)
+   );
+   ```
+
+3. **`Products`**
+   - Stores product information.
+   
+   ```sql
+   CREATE TABLE Products (
+       product_id INT PRIMARY KEY AUTO_INCREMENT,
+       name VARCHAR(100),
+       category VARCHAR(50),
+       price DECIMAL(10, 2)
+   );
+   ```
+
+4. **`Purchases`**
+   - Stores user purchase data.
+   
+   ```sql
+   CREATE TABLE Purchases (
+       purchase_id INT PRIMARY KEY AUTO_INCREMENT,
+       user_id INT,
+       product_id INT,
+       purchase_date DATE,
+       FOREIGN KEY (user_id) REFERENCES Users(user_id),
+       FOREIGN KEY (product_id) REFERENCES Products(product_id)
+   );
+   ```
+
 ---
-![Screenshot 2025-01-13 031110](https://github.com/user-attachments/assets/991c34d0-efe1-433c-85a5-ba7d711d1707)
 
+## Data Initialization
 
+### Insert Sample Data
 
+1. **Insert Users**
 
-### 2. **`Products` Table**
-This table stores information about the products available for purchase.
+   ```sql
+   INSERT INTO Users (name, email) VALUES
+   ('Akshat', 'akshat@example.com'),
+   ('Priyanshu', 'priyanshu@example.com'),
+   ('Prashant', 'prashant@example.com'),
+   ('Abhinandan', 'abhinandan@example.com');
+   ```
 
-| Field      | Type         | Description                                   |
-|------------|--------------|-----------------------------------------------|
-| `product_id` | INT        | Unique ID for each product.                  |
-| `name`     | VARCHAR(100) | Name of the product.                         |
-| `category` | VARCHAR(100) | Category to which the product belongs.       |
-| `price`    | DECIMAL(10,2)| Price of the product.                        |
+2. **Insert Products**
+
+   ```sql
+   INSERT INTO Products (name, category, price) VALUES
+   ('Laptop', 'Electronics', 50000),
+   ('Mouse', 'Electronics', 500),
+   ('Keyboard', 'Electronics', 1000),
+   ('Headphones', 'Accessories', 2000),
+   ('Smartphone', 'Electronics', 30000),
+   ('Charger', 'Electronics', 1500),
+   ('Desk Lamp', 'Accessories', 1200),
+   ('Backpack', 'Accessories', 3000),
+   ('Gaming Console', 'Electronics', 40000),
+   ('Tablet', 'Electronics', 20000);
+   ```
+
+3. **Insert Purchases**
+
+   ```sql
+   INSERT INTO Purchases (user_id, product_id, purchase_date) VALUES
+   (1, 1, '2025-01-01'), -- Laptop
+   (1, 2, '2025-01-03'), -- Mouse
+   (1, 5, '2025-01-10'), -- Smartphone
+
+   (2, 3, '2025-01-05'), -- Keyboard
+   (2, 4, '2025-01-06'), -- Headphones
+   (2, 6, '2025-01-08'), -- Charger
+
+   (3, 7, '2025-01-09'), -- Desk Lamp
+   (3, 8, '2025-01-11'), -- Backpack
+   (3, 9, '2025-01-12'), -- Gaming Console
+
+   (4, 10, '2025-01-13'), -- Tablet
+   (4, 4, '2025-01-14'), -- Headphones
+   (4, 5, '2025-01-15'); -- Smartphone
+   ```
+
+4. **Insert Aggregated Data**
+
+   ```sql
+   INSERT INTO user_product_aggregation (user_id, category, purchase_count)
+   SELECT Purchases.user_id, Products.category, COUNT(Purchases.product_id) AS purchase_count
+   FROM Purchases
+   JOIN Products ON Purchases.product_id = Products.product_id
+   GROUP BY Purchases.user_id, Products.category;
+   ```
 
 ---
-![Screenshot 2025-01-13 031030](https://github.com/user-attachments/assets/582d9906-9631-484f-b117-c5769bad2c41)
 
-## Query Goal
-To recommend products that:
-- Belong to the same category as products the user has already purchased.
-- Have not yet been purchased by the user.
+## Recommendation Queries
 
----
+### 1. Collaborative Filtering Query
 
-## Query
+Recommends products based on items purchased by other users who have bought the same products as the target user.
+
+```sql
+SELECT pr.name AS recommended_product, COUNT(*) AS popularity
+FROM Purchases p1
+JOIN Purchases p2 ON p1.user_id != p2.user_id
+                  AND p1.product_id = p2.product_id
+JOIN Products pr ON p2.product_id = pr.product_id
+WHERE p1.user_id = 1
+GROUP BY pr.name
+ORDER BY popularity DESC;
+```
+
+### 2. Content-Based Recommendation Query
+
+Recommends products from the same categories as the products purchased by the target user, excluding already purchased items.
+
 ```sql
 SELECT DISTINCT p2.name AS recommended_product
 FROM Purchases p1
@@ -61,103 +156,72 @@ WHERE p1.user_id = 1
 
 ---
 
-## Step-by-Step Explanation
-![Screenshot 2025-01-13 031751](https://github.com/user-attachments/assets/57bfa3dd-3ab1-4914-848b-3fa20708e1e1)
+## Python Integration
 
-### 1. **Filter Purchases by the Target User**
-The subquery `FROM Purchases p1 WHERE p1.user_id = 1` selects all purchases made by `user_id = 1`. This forms the basis for identifying the categories of interest.
+### Connecting Python to MySQL Database
 
-#### Example Data:
-| user_id | product_id | purchase_date |
-|---------|------------|---------------|
-| 1       | 1          | 2025-01-01    |
-| 1       | 2          | 2025-01-03    |
-| 1       | 5          | 2025-01-10    |
+```python
+import mysql.connector
 
----
-
-### 2. **Join with Products to Identify Categories**
-The query joins `Purchases` (`p1`) with the `Products` table (`p1p`) on `p1.product_id = p1p.product_id`. This allows access to the category information for the purchased products.
-
-#### Matching Data:
-| product_id | name       | category     | price   |
-|------------|------------|--------------|---------|
-| 1          | Laptop     | Electronics  | 50000.00 |
-| 2          | Mouse      | Electronics  |   500.00 |
-| 5          | Smartphone | Electronics  | 30000.00 |
-
----
-
-### 3. **Find All Products in the Same Categories**
-The query performs another join with the `Products` table (`p2`) to find other products in the same category as those identified in Step 2.
-
-#### Example Data for `category = 'Electronics'`:
-| product_id | name           | category     | price   |
-|------------|----------------|--------------|---------|
-| 1          | Laptop         | Electronics  | 50000.00 |
-| 2          | Mouse          | Electronics  |   500.00 |
-| 3          | Keyboard       | Electronics  |  1000.00 |
-| 5          | Smartphone     | Electronics  | 30000.00 |
-| 6          | Charger        | Electronics  |  1500.00 |
-| 9          | Gaming Console | Electronics  | 40000.00 |
-| 10         | Tablet         | Electronics  | 20000.00 |
-
----
-
-### 4. **Exclude Products Already Purchased**
-The condition:
-```sql
-p2.product_id NOT IN (
-    SELECT product_id FROM Purchases WHERE user_id = 1
+# Connect to MySQL
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="password",
+    database="ecommerce_db"
 )
+
+cursor = db.cursor()
+
+# Collaborative Filtering Recommendation
+def collaborative_filtering(user_id):
+    query = """
+    SELECT DISTINCT pr.name AS recommended_product
+    FROM Purchases p1
+    JOIN Purchases p2 ON p1.user_id != p2.user_id
+                      AND p1.product_id = p2.product_id
+    JOIN Products pr ON p2.product_id = pr.product_id
+    WHERE p1.user_id = %s;
+    """
+    cursor.execute(query, (user_id,))
+    results = cursor.fetchall()
+    return [row[0] for row in results]
+
+# Content-Based Recommendation
+def content_based(user_id):
+    query = """
+    SELECT DISTINCT p2.name AS recommended_product
+    FROM Purchases p1
+    JOIN Products p1p ON p1.product_id = p1p.product_id
+    JOIN Products p2 ON p1p.category = p2.category
+    WHERE p1.user_id = %s
+      AND p2.product_id NOT IN (
+          SELECT product_id FROM Purchases WHERE user_id = %s
+      );
+    """
+    cursor.execute(query, (user_id, user_id))
+    results = cursor.fetchall()
+    return [row[0] for row in results]
+
+# Example Usage
+try:
+    user_id = 1
+    collab_recommendations = collaborative_filtering(user_id)
+    content_recommendations = content_based(user_id)
+
+    print("Collaborative Filtering Recommendations:", collab_recommendations)
+    print("Content-Based Recommendations:", content_recommendations)
+
+except mysql.connector.Error as err:
+    print(f"Error: {err}")
+finally:
+    # Close connection
+    cursor.close()
+    db.close()
 ```
-filters out products that the user (`user_id = 1`) has already purchased.
-
-#### Excluded Product IDs for `user_id = 1`:
-| product_id |
-|------------|
-| 1          |
-| 2          |
-| 5          |
-
-Remaining products:
-| product_id | name           | category     | price   |
-|------------|----------------|--------------|---------|
-| 3          | Keyboard       | Electronics  |  1000.00 |
-| 6          | Charger        | Electronics  |  1500.00 |
-| 9          | Gaming Console | Electronics  | 40000.00 |
-| 10         | Tablet         | Electronics  | 20000.00 |
-
----
-
-### 5. **Select Recommended Products**
-The `DISTINCT` keyword ensures that only unique product names are returned as recommendations.
-
----
-
-## Expected Output
-| recommended_product |
-|---------------------|
-| Keyboard            |
-| Charger             |
-| Gaming Console      |
-| Tablet              |
-
-These are the products that belong to the same category (`Electronics`) as those purchased by `user_id = 1` but have not been purchased by them yet.
 
 ---
 
 ## Summary
-This query provides a simple product recommendation system by:
-1. Identifying the categories of products a user has purchased.
-2. Finding other products in those categories.
-3. Excluding products the user has already purchased.
-
-### Benefits:
-- Personalized recommendations based on user preferences.
-- Ensures no duplicate or irrelevant recommendations.
-
-### Limitations:
-- Assumes category-based recommendations are sufficient.
-- Does not account for user-specific preferences like price or brand.
+This recommendation system combines collaborative filtering and content-based techniques to provide personalized product suggestions. It integrates seamlessly with a MySQL database and Python for real-time recommendations.
 
