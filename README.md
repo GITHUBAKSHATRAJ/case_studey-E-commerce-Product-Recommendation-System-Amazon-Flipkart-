@@ -72,6 +72,8 @@ This README file explains the implementation of a recommendation system using SQ
    ('Prashant', 'prashant@example.com'),
    ('Abhinandan', 'abhinandan@example.com');
    ```
+   ![Screenshot 2025-01-13 030956](https://github.com/user-attachments/assets/62249ff9-5e8d-42e2-9ae0-43ca5ce884eb)
+
 
 2. **Insert Products**
 
@@ -88,6 +90,9 @@ This README file explains the implementation of a recommendation system using SQ
    ('Gaming Console', 'Electronics', 40000),
    ('Tablet', 'Electronics', 20000);
    ```
+![Screenshot 2025-01-13 031030](https://github.com/user-attachments/assets/ce209915-754f-42db-aaa8-29010f604264)
+
+   
 
 3. **Insert Purchases**
 
@@ -109,6 +114,9 @@ This README file explains the implementation of a recommendation system using SQ
    (4, 4, '2025-01-14'), -- Headphones
    (4, 5, '2025-01-15'); -- Smartphone
    ```
+![Screenshot 2025-01-13 031110](https://github.com/user-attachments/assets/b3c87f0f-d92b-4302-a196-fffc5096b764)
+
+   
 
 4. **Insert Aggregated Data**
 
@@ -119,6 +127,9 @@ This README file explains the implementation of a recommendation system using SQ
    JOIN Products ON Purchases.product_id = Products.product_id
    GROUP BY Purchases.user_id, Products.category;
    ```
+![Screenshot 2025-01-13 031751](https://github.com/user-attachments/assets/c57cf8cb-4998-4aa3-8451-4d14682c4dbc)
+
+   
 
 ---
 
@@ -138,6 +149,9 @@ WHERE p1.user_id = 1
 GROUP BY pr.name
 ORDER BY popularity DESC;
 ```
+![Screenshot 2025-01-13 031250](https://github.com/user-attachments/assets/da786dc4-23c9-42bb-84ca-a66680f7e777)
+
+
 
 ### 2. Content-Based Recommendation Query
 
@@ -153,6 +167,9 @@ WHERE p1.user_id = 1
       SELECT product_id FROM Purchases WHERE user_id = 1
   );
 ```
+
+![Screenshot 2025-01-13 031449](https://github.com/user-attachments/assets/8cf77864-dcd5-4b95-8f49-bd933be7190d)
+
 
 ---
 
