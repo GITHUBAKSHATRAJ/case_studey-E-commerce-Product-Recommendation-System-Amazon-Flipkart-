@@ -21,7 +21,9 @@ This table stores information about product purchases made by users.
 | `user_id`     | INT    | ID of the user who made the purchase. |
 | `product_id`  | INT    | ID of the purchased product.          |
 | `purchase_date` | DATE | Date when the purchase was made.      |
+---
 ![Screenshot 2025-01-13 031110](https://github.com/user-attachments/assets/991c34d0-efe1-433c-85a5-ba7d711d1707)
+
 
 
 
