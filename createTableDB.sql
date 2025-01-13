@@ -22,5 +22,16 @@ CREATE TABLE Purchases (
     purchase_date DATE,
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (product_id) REFERENCES Products(product_id)
+
+    
 );
 describe purcheses;
+
+CREATE TABLE user_product_aggregation (
+    user_id INT NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    purchase_count INT NOT NULL,
+    PRIMARY KEY (user_id, category)
+);
+describe user_product_aggregation;
+
