@@ -1,3 +1,5 @@
+
+--Collaborative Filtering Query
 create database ecommerce_db;
 SELECT pr.name AS recommended_product, COUNT(*) AS popularity
 FROM Purchases p1
@@ -7,6 +9,11 @@ JOIN Products pr ON p2.product_id = pr.product_id
 WHERE p1.user_id = 1
 GROUP BY pr.name
 ORDER BY popularity DESC;
+
+
+
+
+--Content-Based Recommendations
 
 SELECT DISTINCT p2.name AS recommended_product
 FROM Purchases p1
