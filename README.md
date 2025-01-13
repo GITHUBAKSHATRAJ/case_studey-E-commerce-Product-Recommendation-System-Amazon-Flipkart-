@@ -236,6 +236,8 @@ finally:
     cursor.close()
     db.close()
 ```
+![image](https://github.com/user-attachments/assets/88882d8b-b634-4dc6-91f9-289996886244)
+
 
 ---
 
