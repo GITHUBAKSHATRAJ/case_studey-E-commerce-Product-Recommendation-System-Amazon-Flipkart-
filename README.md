@@ -1,0 +1,2 @@
+# case_studey-E-commerce-Product-Recommendation-System-Amazon-Flipkart-
+E-commerce Product Recommendation System Real-Life Example • Amazon and Flipkart utilize recommendation systems to personalize the shopping experience by analyzing user profiles, browsing history, purchase history, and preferences. • Example: When a user views a smartphone, the system might recommend accessories like cases, screen protectors, 
